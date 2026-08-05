@@ -209,8 +209,8 @@ function mostrarPagina(numPagina) {
 
     let html = `<div class="table-wrapper"><table class="table-financiera"><thead><tr>`;
     CAMPOS_TABLA.forEach(obj => {
-        let align = MONEDA_CAMPOS.includes(obj.campo) ? ' class="moneda-th"' : '';
-        html += `<th${align}>${obj.label}</th>`;
+        let cls = MONEDA_CAMPOS.includes(obj.campo) ? 'moneda-th' : ('col-' + obj.campo.toLowerCase());
+        html += `<th class="${cls}">${obj.label}</th>`;
     });
     html += `</tr></thead><tbody>`;
     const inicio = (numPagina - 1) * REGISTROS_POR_PAGINA;
@@ -222,8 +222,8 @@ function mostrarPagina(numPagina) {
                 let valor = formatoMoneda(fila[campo]);
                 html += `<td class="moneda-td"><span class="moneda-simbolo">L</span><span class="moneda-num">${valor.slice(2)}</span></td>`;
             } else {
-                let tdClass = campo === "Observaciones" ? " class='observaciones-col'" : "";
-                html += `<td${tdClass}>${fila[campo] ?? ''}</td>`;
+                let tdClass = 'col-' + campo.toLowerCase();
+                html += `<td class="${tdClass}">${fila[campo] ?? ''}</td>`;
             }
         });
         html += `</tr>`;
@@ -381,13 +381,27 @@ document.getElementById('btn-consolidado-pdf').addEventListener('click', functio
       formatoMoneda(c.UltimoSaldo)
     ]);
 
+    // Fila de total general de saldos
+    const totalSaldo = consolidado.reduce((sum, c) => {
+      const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
+    rows.push(['', '', '', '', 'TOTAL SALDOS', formatoMoneda(totalSaldo)]);
+
     doc.autoTable({
         head: [['Cód. Cliente', 'Nombre', 'Cuenta', '# Trans.', 'Última Fecha', 'Saldo Actual']],
         body: rows,
         startY: 58,
         styles: { fontSize: 10 },
         headStyles: { halign: 'center', fontSize: 11 },
-        columnStyles: { 5: { halign: 'right' } }
+        columnStyles: { 5: { halign: 'right' } },
+        didParseCell: function (data) {
+          // Resaltar la fila de totales
+          if (data.row.index === rows.length - 1) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [220, 230, 245];
+          }
+        }
     });
 
     doc.save('consolidado_cliente.pdf');
@@ -396,6 +410,10 @@ document.getElementById('btn-consolidado-pdf').addEventListener('click', functio
 document.getElementById('btn-consolidado-excel').addEventListener('click', function () {
     if (resultadosFiltrados.length === 0) return;
     const consolidado = calcularConsolidado(resultadosFiltrados);
+    const totalSaldoXls = consolidado.reduce((sum, c) => {
+      const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
     const ws_data = [
         ['Cód. Cliente', 'Nombre', 'Cuenta', '# Trans.', 'Última Fecha', 'Saldo Actual'],
         ...consolidado.map(c => [
@@ -405,7 +423,8 @@ document.getElementById('btn-consolidado-excel').addEventListener('click', funct
           c.Transacciones,
           c.UltimaFecha ?? '',
           formatoMoneda(c.UltimoSaldo)
-        ])
+        ]),
+        ['', '', '', '', 'TOTAL SALDOS', formatoMoneda(totalSaldoXls)]
     ];
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(ws_data);

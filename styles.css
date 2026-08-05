@@ -468,7 +468,7 @@ body {
 }
 .table-financiera {
   width: 100%;
-  min-width: 780px;
+  min-width: 960px;
   border-collapse: collapse;
   font-size: 0.88rem;
 }
@@ -507,8 +507,31 @@ body {
   word-break: break-word;
   max-width: 180px;
 }
-.table-financiera td.observaciones-col {
+/* Columnas ampliadas */
+.table-financiera th.col-cuenta,
+.table-financiera td.col-cuenta {
   min-width: 140px;
+}
+.table-financiera th.col-fechahora,
+.table-financiera td.col-fechahora {
+  min-width: 130px;
+  white-space: nowrap;
+}
+.table-financiera th.col-tipo,
+.table-financiera td.col-tipo {
+  min-width: 110px;
+}
+.table-financiera th.col-observaciones,
+.table-financiera td.col-observaciones {
+  min-width: 200px;
+  max-width: 320px;
+  font-size: 0.84rem;
+  color: var(--gray-500);
+}
+/* Alias legacy por compatibilidad */
+.table-financiera td.observaciones-col {
+  min-width: 200px;
+  max-width: 320px;
   font-size: 0.84rem;
   color: var(--gray-500);
 }
