@@ -81,6 +81,8 @@ function aplicarFiltroCuenta() {
   mostrarPagina(paginaActual);
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+
 document.getElementById('filtro-cuenta').addEventListener('change', aplicarFiltroCuenta);
 
 document.getElementById('consultaForm').addEventListener('submit', function(e) {
@@ -368,3 +370,5 @@ document.getElementById('btn-consolidado-excel').addEventListener('click', funct
 });
 
 window.mostrarPagina = mostrarPagina;
+
+}); // end DOMContentLoaded
