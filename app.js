@@ -201,9 +201,20 @@ function mostrarPagina(numPagina) {
     document.getElementById('resultados').innerHTML = html;
 
     let pagHtml = `<div class="pagination">`;
-    for (let i = 1; i <= totalPaginas; i++) {
+    const VENTANA = 5; // botones numerados visibles a la vez
+    let inicio_p = Math.max(1, numPagina - Math.floor(VENTANA / 2));
+    let fin_p = Math.min(totalPaginas, inicio_p + VENTANA - 1);
+    if (fin_p - inicio_p + 1 < VENTANA) inicio_p = Math.max(1, fin_p - VENTANA + 1);
+
+    pagHtml += `<button ${numPagina === 1 ? 'disabled' : ''} onclick="mostrarPagina(1)" title="Primera">«</button>`;
+    pagHtml += `<button ${numPagina === 1 ? 'disabled' : ''} onclick="mostrarPagina(${numPagina - 1})" title="Anterior">‹</button>`;
+    if (inicio_p > 1) pagHtml += `<span class="pag-ellipsis">…</span>`;
+    for (let i = inicio_p; i <= fin_p; i++) {
         pagHtml += `<button class="${i === numPagina ? 'active' : ''}" onclick="mostrarPagina(${i})">${i}</button>`;
     }
+    if (fin_p < totalPaginas) pagHtml += `<span class="pag-ellipsis">…</span>`;
+    pagHtml += `<button ${numPagina === totalPaginas ? 'disabled' : ''} onclick="mostrarPagina(${numPagina + 1})" title="Siguiente">›</button>`;
+    pagHtml += `<button ${numPagina === totalPaginas ? 'disabled' : ''} onclick="mostrarPagina(${totalPaginas})" title="Última">»</button>`;
     pagHtml += `</div>`;
     document.getElementById('paginacion').innerHTML = pagHtml;
     paginaActual = numPagina;
