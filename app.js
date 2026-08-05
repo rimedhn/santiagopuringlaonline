@@ -168,10 +168,30 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
                 `<div class="datos-row">
                   <span><strong>Código Cliente:</strong> ${datosCliente.CodigoCliente}</span>
                   <span><strong>Nombre:</strong> ${datosCliente.NombreCliente}</span>
-                  <span><strong>Cuenta:</strong> ${datosCliente.Cuenta}</span>
                 </div>`;
               document.getElementById('datos-cliente').innerHTML = clienteHtml;
-              document.getElementById('datos-cliente-section').style.display = "block";
+
+              // Resumen de saldos por cuenta
+              const consolidadoResumen = calcularConsolidado(filtrados);
+              const totalSaldoResumen = consolidadoResumen.reduce((sum, c) => {
+                const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
+                return sum + (isNaN(num) ? 0 : num);
+              }, 0);
+              let saldosHtml = '<div class="resumen-saldos-table">';
+              consolidadoResumen.forEach(c => {
+                saldosHtml += `<div class="resumen-saldo-row">
+                  <span class="resumen-cuenta">${c.Cuenta}</span>
+                  <span class="resumen-monto">${formatoMoneda(c.UltimoSaldo)}</span>
+                </div>`;
+              });
+              saldosHtml += `<div class="resumen-saldo-row resumen-total">
+                <span class="resumen-cuenta">Total</span>
+                <span class="resumen-monto">${formatoMoneda(totalSaldoResumen)}</span>
+              </div>`;
+              saldosHtml += '</div>';
+              document.getElementById('resumen-saldos').innerHTML = saldosHtml;
+
+              document.getElementById('datos-cliente-section').style.display = "grid";
               poblarFiltroCuenta(filtrados);
             } else {
               document.getElementById('datos-cliente-section').style.display = "none";
