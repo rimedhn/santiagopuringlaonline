@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Transacciones - Inversiones y Servicios Santiago Puringla</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="Coop_Santiago_Puringla_Logo-removebg-preview.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <header class="main-header">
+    <img src="Coop_Santiago_Puringla_Logo-removebg-preview.png" alt="Logo Institución" class="logo">
+    <h1>Inversiones y Servicios para el desarrollo de Santiago Puringla</h1>
+  </header>
+  <div class="container">
+    <!-- DATOS DEL NEGOCIO -->
+    <section class="negocio-datos">
+      <div class="negocio-info">
+        <img src="Coop_Santiago_Puringla_Logo-removebg-preview.png" alt="Logo Negocio" class="negocio-logo">
+        <div>
+          <h2>Bienvenido</h2>
+          <p class="negocio-nombre"><strong>Inversiones y Servicios para el desarrollo de Santiago Puringla</strong></p>
+          <p class="negocio-direccion">📍 Santiago Puringla, La Paz, Bo. El Centro. Honduras.</p>
+          <p class="negocio-contacto">
+            <span>📞 <a href="tel:27745283">2774-5283</a></span>
+            <span>💬 <a href="https://wa.me/50497624974" target="_blank">9762-4974</a></span>
+            <span>✉️ <a href="mailto:puringlense@gmail.com">puringlense@gmail.com</a></span>
+          </p>
+        </div>
+      </div>
+    </section>
+    <!-- INSTRUCCIONES -->
+    <section class="instrucciones">
+      <h3>¿Cómo usar este sitio?</h3>
+      <ol>
+        <li>Ingresa tu <b>ID Cliente</b> en el campo correspondiente.</li>
+        <li>Opcionalmente, selecciona un <b>rango de fechas</b> para filtrar los resultados.</li>
+        <li>Haz clic en <b>Consultar</b> para ver tus transacciones.</li>
+        <li>Puedes <b>descargar</b> los resultados como PDF o Excel.</li>
+        <li>¿Necesitas ayuda? Usa el botón <b>WhatsApp</b> en la esquina.</li>
+      </ol>
+    </section>
+    <!-- FORMULARIO DE CONSULTA -->
+    <section class="consulta-form-section">
+      <form id="consultaForm">
+        <div class="form-row">
+          <label for="cliente">ID Cliente:</label>
+          <input type="text" id="cliente" name="cliente" required>
+        </div>
+        <div class="form-row">
+          <label for="fecha-inicial">Fecha inicial:</label>
+          <input type="date" id="fecha-inicial" name="fecha-inicial">
+        </div>
+        <div class="form-row">
+          <label for="fecha-final">Fecha final:</label>
+          <input type="date" id="fecha-final" name="fecha-final">
+        </div>
+        <div class="form-row">
+          <button type="submit" id="btn-consultar">Consultar</button>
+        </div>
+      </form>
+    </section>
+    <!-- DATOS CLIENTE CONSULTADO -->
+    <section id="datos-cliente-section" class="datos-cliente-section" style="display:none;">
+      <h3>Datos del Cliente</h3>
+      <div id="datos-cliente"></div>
+    </section>
+    <!-- BOTONES DE EXPORTACIÓN -->
+    <div class="export-buttons">
+      <button id="btn-pdf">Exportar PDF</button>
+      <button id="btn-excel">Exportar Excel</button>
+    </div>
+    <!-- TRANSACCIONES -->
+    <section id="transacciones-section">
+      <div id="resultados"></div>
+      <div id="paginacion"></div>
+    </section>
+  </div>
+  <footer class="main-footer">
+    <p>
+      &copy; 2025 Inversiones y Servicios para el desarrollo de Santiago Puringla.<br>
+      Bo. El Centro, Santiago Puringla, La Paz, Honduras.<br>
+      Tel: 2774-5283 | Whatsapp: 9762-4974 | Email: puringlense@gmail.com
+    </p>
+  </footer>
+  <!-- WhatsApp floating button solo icono -->
+  <a href="https://wa.me/50497624974?text=Hola%20Inversiones%20y%20Servicios%20Santiago%20Puringla" 
+     target="_blank" class="whatsapp-float" title="Escríbenos por WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+  </a>
+  <script src="app.js"></script>
+</body>
+</html>
