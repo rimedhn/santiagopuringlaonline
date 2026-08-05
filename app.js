@@ -91,7 +91,10 @@ document.addEventListener('DOMContentLoaded', function () {
 // ---- SESIÓN: precarga del cliente autenticado ----
 // Recupera idCliente y usuario del sessionStorage para evitar ingreso manual
 const sesion = getSession();
-if (sesion) {
+if (!sesion) {
+  // Sin sesión activa: redirigir al login
+  window.location.href = 'login.html';
+} else {
   // Mostrar nombre de usuario en la barra superior
   const authUserEl = document.getElementById('authUserName');
   if (authUserEl) authUserEl.textContent = sesion.usuario;
@@ -111,7 +114,11 @@ const btnLogout = document.getElementById('btnLogout');
 if (btnLogout) {
   btnLogout.addEventListener('click', function () {
     clearSession();
-    window.location.href = 'login.html';
+    // Limpiar datos en memoria antes de redirigir
+    resultadosBase = [];
+    resultadosFiltrados = [];
+    datosCliente = {};
+    window.location.replace('login.html');
   });
 }
 
@@ -186,6 +193,11 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
               </div>`;
         });
 });
+
+// Auto-consulta: si hay sesión con idCliente precargado, disparar la búsqueda automáticamente
+if (sesion && sesion.idCliente) {
+  document.getElementById('consultaForm').dispatchEvent(new Event('submit'));
+}
 
 function mostrarPagina(numPagina) {
     const totalPaginas = Math.ceil(resultadosFiltrados.length / REGISTROS_POR_PAGINA);
