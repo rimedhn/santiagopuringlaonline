@@ -1,4 +1,7 @@
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0H2b-KE2VaKy7u7whTbXkGyImP_V8X5jeecCalPen3QTfiC8IczD8gx9kJgImsAmAUP50DAPPZKtx/pub?gid=0&single=true&output=csv";
+// URL del Google Apps Script (mismo endpoint que auth.js).
+// Reemplaza con la URL /exec generada al desplegar script.gs.
+// Este valor debe coincidir con SCRIPT_URL en auth.js.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxE3XqITPK4Qe-OvX20cYc1I7ncrVvir1UTeujYhCCTxGQ70Qk4Y1D_LIm_C4HVwnQ/exec";
 const NEGOCIO = {
   nombre: "Inversiones y Servicios para el desarrollo de Santiago Puringla",
   direccion: "Santiago Puringla, La Paz, Bo. El Centro. Honduras.",
@@ -85,6 +88,33 @@ function aplicarFiltroCuenta() {
 
 document.addEventListener('DOMContentLoaded', function () {
 
+// ---- SESIÓN: precarga del cliente autenticado ----
+// Recupera idCliente y usuario del sessionStorage para evitar ingreso manual
+const sesion = getSession();
+if (sesion) {
+  // Mostrar nombre de usuario en la barra superior
+  const authUserEl = document.getElementById('authUserName');
+  if (authUserEl) authUserEl.textContent = sesion.usuario;
+
+  // Precargar y bloquear el campo de código de cliente
+  const inputCliente = document.getElementById('codigoCliente');
+  if (inputCliente && sesion.idCliente) {
+    inputCliente.value = sesion.idCliente;
+    inputCliente.setAttribute('readonly', true);
+    const badge = document.getElementById('clientePrecargadoBadge');
+    if (badge) badge.style.display = 'inline-flex';
+  }
+}
+
+// Botón de cerrar sesión
+const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', function () {
+    clearSession();
+    window.location.href = 'login.html';
+  });
+}
+
 document.getElementById('filtro-cuenta').addEventListener('change', aplicarFiltroCuenta);
 
 document.getElementById('consultaForm').addEventListener('submit', function(e) {
@@ -111,23 +141,15 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
     document.getElementById('datos-cliente').innerHTML = "";
     document.getElementById('filtro-cuenta-section').style.display = "none";
 
-    fetch(SHEET_CSV_URL)
+    fetch(`${SCRIPT_URL}?action=getTransacciones&codigoCliente=${encodeURIComponent(codigoCliente)}&cuenta=${encodeURIComponent(cuentaBusqueda)}`)
         .then(response => {
             if (!response.ok) throw new Error('No se pudo acceder a los datos');
-            return response.text();
+            return response.json();
         })
-        .then(csv => {
-            const data = Papa.parse(csv, { header: true }).data;
+        .then(data => {
+            if (!Array.isArray(data)) throw new Error(data.error || 'Respuesta inesperada del servidor');
 
-            let filtrados = data.filter(row => {
-              if (row['Estado'] !== 'Activo') return false;
-              const matchCodigo = codigoCliente ? (row['CodigoCliente'] ?? '').trim() === codigoCliente : true;
-              const matchCuenta = cuentaBusqueda ? (row['Cuenta'] ?? '').trim() === cuentaBusqueda : true;
-              // Si se ingresaron ambos, ambos deben coincidir; si solo uno, ese debe coincidir
-              if (codigoCliente && cuentaBusqueda) return matchCodigo && matchCuenta;
-              if (codigoCliente) return matchCodigo;
-              return matchCuenta;
-            });
+            let filtrados = data;
 
             filtrados = filtrarPorFechas(filtrados, fechaInicial, fechaFinal);
             filtrados.forEach((row, idx) => row._rowNum = idx + 2);

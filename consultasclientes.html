@@ -12,9 +12,32 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- auth.js: control de sesión. Debe cargarse antes que el resto de scripts -->
+  <script src="auth.js"></script>
+  <script>
+    // Guardia de acceso: redirige al login si no hay sesión activa
+    requireAuth();
+  </script>
 </head>
 <body>
+  <!-- Barra de usuario autenticado con opción de cerrar sesión -->
+  <div class="auth-bar" id="authBar">
+    <span class="auth-user">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span id="authUserName"></span>
+    </span>
+    <button class="btn-logout" id="btnLogout" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Cerrar sesión
+    </button>
+  </div>
   <header class="main-header">
     <div class="header-inner">
       <img src="Coop_Santiago_Puringla_Logo-removebg-preview.png" alt="Logo Institución" class="logo">
@@ -78,6 +101,13 @@
         <div class="form-row">
           <label for="codigoCliente">Código de Cliente</label>
           <input type="text" id="codigoCliente" name="codigoCliente" placeholder="Ej: 001234" autocomplete="off">
+          <!-- Insignia que se muestra cuando el cliente es precargado desde la sesión -->
+          <span id="clientePrecargadoBadge" class="cliente-precargado-badge" style="display:none;">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Cliente precargado
+          </span>
         </div>
         <div class="form-row">
           <label for="cuenta">Número de Cuenta</label>
