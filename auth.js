@@ -6,7 +6,7 @@
 
 // URL del Web App de Google Apps Script desplegado.
 // Después de desplegar script.gs, reemplaza este valor con la URL /exec generada.
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUaUWPqELjKJAJtCCCJa0JZR0xAbM9HtDqZQTX4nY5rpmMI64UEAbUoD8VN-Ynrtsh/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwiJVpYw44rMpkDuLNFp2Pzoba7joTmUafO-3Q_ptkMBb-26t9HSXe6RrL2hJAiYOc/exec";
 
 const SESSION_KEY = "authSession"; // clave en sessionStorage
 
