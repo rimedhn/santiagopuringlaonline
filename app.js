@@ -9,6 +9,8 @@ const NEGOCIO = {
 
 // Encabezados para mostrar en la tabla (Transacción al final)
 const CAMPOS_TABLA = [
+  { campo: 'Cuenta', label: 'Cuenta' },
+  { campo: 'tipoCuenta', label: 'Tipo Cuenta' },
   { campo: 'FechaHora', label: 'Fecha' },
   { campo: 'Tipo', label: 'Tipo' },
   { campo: 'Monto', label: 'Monto' },
@@ -19,9 +21,13 @@ const CAMPOS_TABLA = [
   { campo: 'Observaciones', label: 'Observaciones' },
   { campo: 'idTransacción', label: 'Transacción' }
 ];
-const CAMPOS_CLIENTE = ['Cliente', 'NombreCliente', 'Cuenta'];
+const CAMPOS_CLIENTE = ['CodigoCliente', 'NombreCliente', 'Cuenta'];
 const MONEDA_CAMPOS = ['Monto', 'Interes', 'Saldo'];
 const REGISTROS_POR_PAGINA = 10;
+
+// resultadosBase: todos los registros que matchean la búsqueda (sin filtro de cuenta)
+// resultadosFiltrados: resultadosBase filtrado por la cuenta seleccionada en el filtro
+let resultadosBase = [];
 let resultadosFiltrados = [];
 let paginaActual = 1;
 let datosCliente = {};
@@ -52,13 +58,49 @@ function filtrarPorFechas(data, fechaInicial, fechaFinal) {
   });
 }
 
+function poblarFiltroCuenta(data) {
+  const cuentas = [...new Set(data.map(row => row['Cuenta'] ?? '').filter(Boolean))].sort();
+  const sel = document.getElementById('filtro-cuenta');
+  sel.innerHTML = '<option value="">— Todas las cuentas —</option>';
+  cuentas.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+  const section = document.getElementById('filtro-cuenta-section');
+  section.style.display = cuentas.length > 1 ? 'flex' : 'none';
+}
+
+function aplicarFiltroCuenta() {
+  const cuentaSel = document.getElementById('filtro-cuenta').value;
+  if (!cuentaSel) {
+    resultadosFiltrados = resultadosBase.slice();
+  } else {
+    resultadosFiltrados = resultadosBase.filter(row => (row['Cuenta'] ?? '') === cuentaSel);
+  }
+  paginaActual = 1;
+  mostrarPagina(paginaActual);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+document.getElementById('filtro-cuenta').addEventListener('change', aplicarFiltroCuenta);
+
 document.getElementById('consultaForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const cliente = document.getElementById('cliente').value.trim();
+    const codigoCliente = document.getElementById('codigoCliente').value.trim();
+    const cuentaBusqueda = document.getElementById('cuenta').value.trim();
     const fechaInicial = document.getElementById('fecha-inicial').value;
     const fechaFinal = document.getElementById('fecha-final').value;
 
-    if (!cliente) return;
+    if (!codigoCliente && !cuentaBusqueda) {
+      document.getElementById('resultados').innerHTML = `
+        <div class="alert alert-warning text-center">
+          Por favor ingresa al menos un Código de Cliente o Número de Cuenta para consultar.
+        </div>`;
+      return;
+    }
 
     document.getElementById('resultados').innerHTML = `
       <div class="text-center">
@@ -67,6 +109,7 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
     document.getElementById('paginacion').innerHTML = '';
     document.getElementById('datos-cliente-section').style.display = "none";
     document.getElementById('datos-cliente').innerHTML = "";
+    document.getElementById('filtro-cuenta-section').style.display = "none";
 
     fetch(SHEET_CSV_URL)
         .then(response => {
@@ -76,29 +119,41 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
         .then(csv => {
             const data = Papa.parse(csv, { header: true }).data;
 
-            let filtrados = data.filter(row => row['Cliente'] === cliente && row['Estado'] === 'Activo');
-            filtrados = filtrarPorFechas(filtrados, fechaInicial, fechaFinal);
+            let filtrados = data.filter(row => {
+              if (row['Estado'] !== 'Activo') return false;
+              const matchCodigo = codigoCliente ? (row['CodigoCliente'] ?? '').trim() === codigoCliente : true;
+              const matchCuenta = cuentaBusqueda ? (row['Cuenta'] ?? '').trim() === cuentaBusqueda : true;
+              // Si se ingresaron ambos, ambos deben coincidir; si solo uno, ese debe coincidir
+              if (codigoCliente && cuentaBusqueda) return matchCodigo && matchCuenta;
+              if (codigoCliente) return matchCodigo;
+              return matchCuenta;
+            });
 
+            filtrados = filtrarPorFechas(filtrados, fechaInicial, fechaFinal);
             filtrados.forEach((row, idx) => row._rowNum = idx + 2);
             filtrados.sort((a, b) => b._rowNum - a._rowNum);
 
-            resultadosFiltrados = filtrados;
+            resultadosBase = filtrados;
 
             if (filtrados.length > 0) {
               datosCliente = {};
               CAMPOS_CLIENTE.forEach(campo => datosCliente[campo] = filtrados[0][campo] ?? "");
               let clienteHtml =
                 `<div class="datos-row">
-                  <span><strong>ID Cliente:</strong> ${datosCliente.Cliente}</span>
+                  <span><strong>Código Cliente:</strong> ${datosCliente.CodigoCliente}</span>
                   <span><strong>Nombre:</strong> ${datosCliente.NombreCliente}</span>
                   <span><strong>Cuenta:</strong> ${datosCliente.Cuenta}</span>
                 </div>`;
               document.getElementById('datos-cliente').innerHTML = clienteHtml;
               document.getElementById('datos-cliente-section').style.display = "block";
+              poblarFiltroCuenta(filtrados);
             } else {
               document.getElementById('datos-cliente-section').style.display = "none";
             }
 
+            // Aplicar filtro de cuenta (inicialmente sin filtro)
+            document.getElementById('filtro-cuenta').value = '';
+            resultadosFiltrados = filtrados;
             paginaActual = 1;
             mostrarPagina(paginaActual);
         })
@@ -115,13 +170,13 @@ function mostrarPagina(numPagina) {
     if (resultadosFiltrados.length === 0) {
         document.getElementById('resultados').innerHTML = `
           <div class="alert alert-danger text-center">
-            No se encontraron transacciones para este cliente con estado "Activo" en el rango de fechas seleccionado.
+            No se encontraron transacciones para los criterios de búsqueda con estado "Activo" en el rango de fechas seleccionado.
           </div>`;
         document.getElementById('paginacion').innerHTML = '';
         return;
     }
 
-    let html = `<div style="overflow-x:auto;"><table class="table-financiera"><thead><tr>`;
+    let html = `<div class="table-wrapper"><table class="table-financiera"><thead><tr>`;
     CAMPOS_TABLA.forEach(obj => {
         let align = MONEDA_CAMPOS.includes(obj.campo) ? ' class="moneda-th"' : '';
         html += `<th${align}>${obj.label}</th>`;
@@ -146,15 +201,33 @@ function mostrarPagina(numPagina) {
     document.getElementById('resultados').innerHTML = html;
 
     let pagHtml = `<div class="pagination">`;
-    for (let i = 1; i <= totalPaginas; i++) {
+    const VENTANA = 5; // botones numerados visibles a la vez
+    let inicio_p = Math.max(1, numPagina - Math.floor(VENTANA / 2));
+    let fin_p = Math.min(totalPaginas, inicio_p + VENTANA - 1);
+    if (fin_p - inicio_p + 1 < VENTANA) inicio_p = Math.max(1, fin_p - VENTANA + 1);
+
+    pagHtml += `<button ${numPagina === 1 ? 'disabled' : ''} onclick="mostrarPagina(1)" title="Primera">«</button>`;
+    pagHtml += `<button ${numPagina === 1 ? 'disabled' : ''} onclick="mostrarPagina(${numPagina - 1})" title="Anterior">‹</button>`;
+    if (inicio_p > 1) pagHtml += `<span class="pag-ellipsis">…</span>`;
+    for (let i = inicio_p; i <= fin_p; i++) {
         pagHtml += `<button class="${i === numPagina ? 'active' : ''}" onclick="mostrarPagina(${i})">${i}</button>`;
     }
+    if (fin_p < totalPaginas) pagHtml += `<span class="pag-ellipsis">…</span>`;
+    pagHtml += `<button ${numPagina === totalPaginas ? 'disabled' : ''} onclick="mostrarPagina(${numPagina + 1})" title="Siguiente">›</button>`;
+    pagHtml += `<button ${numPagina === totalPaginas ? 'disabled' : ''} onclick="mostrarPagina(${totalPaginas})" title="Última">»</button>`;
     pagHtml += `</div>`;
     document.getElementById('paginacion').innerHTML = pagHtml;
     paginaActual = numPagina;
 }
 
-// Exportar PDF
+function encabezadoPDFCliente(doc, yStart) {
+  doc.setFontSize(11);
+  doc.text(`Código Cliente: ${datosCliente.CodigoCliente}`, 14, yStart);
+  doc.text(`Nombre: ${datosCliente.NombreCliente}`, 80, yStart);
+  doc.text(`Cuenta: ${datosCliente.Cuenta}`, 200, yStart);
+}
+
+// Exportar PDF (transacciones filtradas)
 document.getElementById('btn-pdf').addEventListener('click', function () {
     if (resultadosFiltrados.length === 0) return;
     const { jsPDF } = window.jspdf;
@@ -167,10 +240,7 @@ document.getElementById('btn-pdf').addEventListener('click', function () {
     doc.text(`Tel: ${NEGOCIO.telefono} | Whatsapp: ${NEGOCIO.whatsapp} | Email: ${NEGOCIO.email}`, 14, 28);
 
     if (datosCliente && Object.keys(datosCliente).length > 0) {
-      doc.setFontSize(11);
-      doc.text(`ID Cliente: ${datosCliente.Cliente}`, 14, 36);
-      doc.text(`Nombre: ${datosCliente.NombreCliente}`, 80, 36);
-      doc.text(`Cuenta: ${datosCliente.Cuenta}`, 160, 36);
+      encabezadoPDFCliente(doc, 36);
     }
 
     doc.setFontSize(13);
@@ -198,7 +268,7 @@ document.getElementById('btn-pdf').addEventListener('click', function () {
     doc.save('transacciones.pdf');
 });
 
-// Exportar Excel
+// Exportar Excel (transacciones filtradas)
 document.getElementById('btn-excel').addEventListener('click', function () {
     if (resultadosFiltrados.length === 0) return;
     const ws_data = [
@@ -224,4 +294,94 @@ document.getElementById('btn-excel').addEventListener('click', function () {
     XLSX.writeFile(wb, 'transacciones.xlsx');
 });
 
+// ---- REPORTE CONSOLIDADO ----
+// Agrupa los resultados filtrados por Cuenta y calcula el saldo de cada una
+function calcularConsolidado(datos) {
+  const cuentas = {};
+  datos.forEach(row => {
+    const cuenta = row['Cuenta'] ?? '';
+    if (!cuentas[cuenta]) {
+      cuentas[cuenta] = {
+        CodigoCliente: row['CodigoCliente'] ?? '',
+        NombreCliente: row['NombreCliente'] ?? '',
+        Cuenta: cuenta,
+        UltimoSaldo: null,
+        UltimaFecha: null,
+        Transacciones: 0
+      };
+    }
+    cuentas[cuenta].Transacciones++;
+    // El saldo consolidado se toma del primer registro (ya están ordenados desc por _rowNum)
+    if (cuentas[cuenta].UltimoSaldo === null) {
+      cuentas[cuenta].UltimoSaldo = row['Saldo'] ?? '';
+      cuentas[cuenta].UltimaFecha = row['FechaHora'] ?? '';
+    }
+  });
+  return Object.values(cuentas);
+}
+
+document.getElementById('btn-consolidado-pdf').addEventListener('click', function () {
+    if (resultadosFiltrados.length === 0) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait' });
+
+    doc.setFontSize(14);
+    doc.text(NEGOCIO.nombre, 14, 14);
+    doc.setFontSize(10);
+    doc.text(`Dirección: ${NEGOCIO.direccion}`, 14, 22);
+    doc.text(`Tel: ${NEGOCIO.telefono} | Whatsapp: ${NEGOCIO.whatsapp} | Email: ${NEGOCIO.email}`, 14, 28);
+
+    if (datosCliente && Object.keys(datosCliente).length > 0) {
+      doc.setFontSize(11);
+      doc.text(`Código Cliente: ${datosCliente.CodigoCliente}`, 14, 36);
+      doc.text(`Nombre: ${datosCliente.NombreCliente}`, 14, 43);
+    }
+
+    doc.setFontSize(13);
+    doc.text('Reporte Consolidado de Cuentas', 14, 52);
+
+    const consolidado = calcularConsolidado(resultadosFiltrados);
+    const rows = consolidado.map(c => [
+      c.CodigoCliente,
+      c.NombreCliente,
+      c.Cuenta,
+      c.Transacciones,
+      c.UltimaFecha ?? '',
+      formatoMoneda(c.UltimoSaldo)
+    ]);
+
+    doc.autoTable({
+        head: [['Cód. Cliente', 'Nombre', 'Cuenta', '# Trans.', 'Última Fecha', 'Saldo Actual']],
+        body: rows,
+        startY: 58,
+        styles: { fontSize: 10 },
+        headStyles: { halign: 'center', fontSize: 11 },
+        columnStyles: { 5: { halign: 'right' } }
+    });
+
+    doc.save('consolidado_cliente.pdf');
+});
+
+document.getElementById('btn-consolidado-excel').addEventListener('click', function () {
+    if (resultadosFiltrados.length === 0) return;
+    const consolidado = calcularConsolidado(resultadosFiltrados);
+    const ws_data = [
+        ['Cód. Cliente', 'Nombre', 'Cuenta', '# Trans.', 'Última Fecha', 'Saldo Actual'],
+        ...consolidado.map(c => [
+          c.CodigoCliente,
+          c.NombreCliente,
+          c.Cuenta,
+          c.Transacciones,
+          c.UltimaFecha ?? '',
+          formatoMoneda(c.UltimoSaldo)
+        ])
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    XLSX.utils.book_append_sheet(wb, ws, 'Consolidado');
+    XLSX.writeFile(wb, 'consolidado_cliente.xlsx');
+});
+
 window.mostrarPagina = mostrarPagina;
+
+}); // end DOMContentLoaded
