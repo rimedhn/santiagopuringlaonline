@@ -116,7 +116,13 @@ function handleLogin(username, password) {
     }
 
     const config = SPREADSHEET_CONFIG.acceso;
-    const sheet = SpreadsheetApp.openById(config.spreadsheetId).getSheetByName(config.sheetName);
+    const ss = SpreadsheetApp.openById(config.spreadsheetId);
+    const sheet = ss.getSheetByName(config.sheetName);
+    if (!sheet) {
+      const hojasDisponibles = ss.getSheets().map(s => s.getName()).join(', ');
+      Logger.log('Hoja de acceso no encontrada. Disponibles: ' + hojasDisponibles);
+      return { success: false, message: 'Configuración incorrecta: hoja "' + config.sheetName + '" no existe. Hojas disponibles: ' + hojasDisponibles };
+    }
     const data = sheet.getDataRange().getValues();
 
     if (data.length < 2) {
@@ -175,7 +181,13 @@ function handleLogin(username, password) {
 function getTransacciones(codigoCliente, cuenta) {
   try {
     const config = SPREADSHEET_CONFIG.transacciones;
-    const sheet = SpreadsheetApp.openById(config.spreadsheetId).getSheetByName(config.sheetName);
+    const ss = SpreadsheetApp.openById(config.spreadsheetId);
+    const sheet = ss.getSheetByName(config.sheetName);
+    if (!sheet) {
+      const hojasDisponibles = ss.getSheets().map(s => s.getName()).join(', ');
+      Logger.log('Hoja de transacciones no encontrada. Disponibles: ' + hojasDisponibles);
+      return { error: 'Configuración incorrecta: hoja "' + config.sheetName + '" no existe. Hojas disponibles: ' + hojasDisponibles };
+    }
     const data = sheet.getDataRange().getValues();
 
     if (data.length < 2) {
@@ -219,5 +231,44 @@ function getTransacciones(codigoCliente, cuenta) {
   } catch (error) {
     Logger.log('Error en getTransacciones: ' + error.toString());
     return { error: 'Error al obtener transacciones: ' + error.toString() };
+  }
+}
+
+// ---- Diagnóstico: ejecuta desde el editor de Apps Script para verificar conexiones ----
+function testConexiones() {
+  Logger.log('=== TEST CONEXIONES SANTIAGO PURINGLA ===');
+
+  // Test hoja de Acceso
+  try {
+    const cfgA = SPREADSHEET_CONFIG.acceso;
+    const ssA = SpreadsheetApp.openById(cfgA.spreadsheetId);
+    const hojasA = ssA.getSheets().map(s => s.getName());
+    Logger.log('Hojas en spreadsheet de Acceso (' + cfgA.spreadsheetId + '): ' + hojasA.join(', '));
+    const sheetA = ssA.getSheetByName(cfgA.sheetName);
+    if (sheetA) {
+      Logger.log('✓ Hoja "' + cfgA.sheetName + '" encontrada. Filas: ' + sheetA.getLastRow());
+      Logger.log('  Headers: ' + sheetA.getRange(1, 1, 1, sheetA.getLastColumn()).getValues()[0].join(', '));
+    } else {
+      Logger.log('✗ Hoja "' + cfgA.sheetName + '" NO encontrada.');
+    }
+  } catch (e) {
+    Logger.log('✗ Error al abrir spreadsheet de Acceso: ' + e.toString());
+  }
+
+  // Test hoja de Transacciones
+  try {
+    const cfgT = SPREADSHEET_CONFIG.transacciones;
+    const ssT = SpreadsheetApp.openById(cfgT.spreadsheetId);
+    const hojasT = ssT.getSheets().map(s => s.getName());
+    Logger.log('Hojas en spreadsheet de Transacciones (' + cfgT.spreadsheetId + '): ' + hojasT.join(', '));
+    const sheetT = ssT.getSheetByName(cfgT.sheetName);
+    if (sheetT) {
+      Logger.log('✓ Hoja "' + cfgT.sheetName + '" encontrada. Filas: ' + sheetT.getLastRow());
+      Logger.log('  Headers: ' + sheetT.getRange(1, 1, 1, sheetT.getLastColumn()).getValues()[0].join(', '));
+    } else {
+      Logger.log('✗ Hoja "' + cfgT.sheetName + '" NO encontrada.');
+    }
+  } catch (e) {
+    Logger.log('✗ Error al abrir spreadsheet de Transacciones: ' + e.toString());
   }
 }
