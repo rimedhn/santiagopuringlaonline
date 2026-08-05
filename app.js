@@ -9,6 +9,8 @@ const NEGOCIO = {
 
 // Encabezados para mostrar en la tabla (Transacción al final)
 const CAMPOS_TABLA = [
+  { campo: 'Cuenta', label: 'Cuenta' },
+  { campo: 'tipoCuenta', label: 'Tipo Cuenta' },
   { campo: 'FechaHora', label: 'Fecha' },
   { campo: 'Tipo', label: 'Tipo' },
   { campo: 'Monto', label: 'Monto' },
