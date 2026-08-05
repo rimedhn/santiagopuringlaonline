@@ -176,7 +176,7 @@ function mostrarPagina(numPagina) {
         return;
     }
 
-    let html = `<div style="overflow-x:auto;"><table class="table-financiera"><thead><tr>`;
+    let html = `<div class="table-wrapper"><table class="table-financiera"><thead><tr>`;
     CAMPOS_TABLA.forEach(obj => {
         let align = MONEDA_CAMPOS.includes(obj.campo) ? ' class="moneda-th"' : '';
         html += `<th${align}>${obj.label}</th>`;

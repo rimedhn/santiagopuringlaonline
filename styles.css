@@ -1,448 +1,732 @@
-body {
-  background: linear-gradient(135deg, #005cac 0%, #0089d6 100%);
-  font-family: 'Segoe UI', Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-.main-header {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background: #fff;
-  padding: 20px 40px;
-  box-shadow: 0 2px 10px rgba(0, 92, 172, 0.08);
-}
-.logo {
-  height: 60px;
-}
-.main-header h1 {
-  color: #005cac;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 1.5px;
-}
-.container {
-  max-width: 900px;
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 92, 172, 0.12);
-  padding: 32px;
-  overflow-x: hidden;
+/* ============================================================
+   VARIABLES & RESET
+   ============================================================ */
+:root {
+  --navy:       #0b1f3a;
+  --navy-mid:   #112d52;
+  --navy-light: #1a4170;
+  --blue:       #1565c0;
+  --blue-light: #1e88e5;
+  --blue-pale:  #e3f0fb;
+  --gold:       #c9942a;
+  --gold-light: #f0c040;
+  --green:      #1e7e34;
+  --green-bg:   #e6f4ea;
+  --amber:      #b45309;
+  --amber-bg:   #fef3c7;
+  --red:        #b91c1c;
+  --red-bg:     #fef2f2;
+  --teal:       #0e7490;
+  --teal-bg:    #ecfeff;
+  --purple:     #6d28d9;
+  --purple-bg:  #ede9fe;
+  --gray-50:    #f8fafc;
+  --gray-100:   #f1f5f9;
+  --gray-200:   #e2e8f0;
+  --gray-300:   #cbd5e1;
+  --gray-400:   #94a3b8;
+  --gray-500:   #64748b;
+  --gray-700:   #334155;
+  --gray-900:   #0f172a;
+  --white:      #ffffff;
+  --radius-sm:  6px;
+  --radius:     10px;
+  --radius-lg:  16px;
+  --shadow-sm:  0 1px 3px rgba(11,31,58,.1), 0 1px 2px rgba(11,31,58,.06);
+  --shadow:     0 4px 16px rgba(11,31,58,.10), 0 1px 4px rgba(11,31,58,.08);
+  --shadow-lg:  0 10px 40px rgba(11,31,58,.14), 0 2px 8px rgba(11,31,58,.08);
+  --font: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --transition: 0.18s ease;
 }
 
-/* DATOS DEL NEGOCIO */
-.negocio-datos {
-  margin-bottom: 24px;
-  background: #eaf6fd;
-  border-radius: 10px;
-  padding: 14px 22px 10px 22px;
-  box-shadow: 0 2px 12px rgba(0, 92, 172, 0.10);
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-mid) 55%, #1a3a6b 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  color: var(--gray-700);
+  font-size: 15px;
+  line-height: 1.6;
 }
-.negocio-info {
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.main-header {
+  background: rgba(11, 31, 58, 0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--gold);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 72px;
   display: flex;
   align-items: center;
   gap: 18px;
 }
+.logo {
+  height: 48px;
+  flex-shrink: 0;
+}
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.header-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  opacity: 0.9;
+}
+.main-header h1 {
+  color: var(--white);
+  font-size: 1.13rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.2px;
+  line-height: 1.25;
+}
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+.container {
+  max-width: 1100px;
+  margin: 32px auto 40px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ============================================================
+   CARDS (shared)
+   ============================================================ */
+.negocio-datos,
+.instrucciones,
+.consulta-form-section,
+.datos-cliente-section,
+.filtro-cuenta-section,
+.export-buttons,
+#transacciones-section {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+
+/* ============================================================
+   NEGOCIO DATOS
+   ============================================================ */
+.negocio-datos {
+  padding: 22px 28px;
+}
+.negocio-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 .negocio-logo {
   height: 72px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,92,172,0.09);
+  width: 72px;
+  object-fit: contain;
+  border-radius: var(--radius);
+  border: 2px solid var(--gray-200);
+  background: var(--gray-50);
+  flex-shrink: 0;
+  padding: 4px;
+}
+.negocio-text h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin: 0 0 4px;
 }
 .negocio-nombre {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #005cac;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 6px;
 }
 .negocio-direccion {
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 3px;
+  font-size: 0.88rem;
+  color: var(--gray-500);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .negocio-contacto {
-  font-size: 1rem;
-  color: #444;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
 }
-.negocio-contacto span { margin-right: 15px; }
-.negocio-contacto a { color: #005cac; text-decoration: none; font-weight: 600; }
+.negocio-contacto a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--blue);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--blue-pale);
+  transition: background var(--transition), color var(--transition);
+}
+.negocio-contacto a:hover {
+  background: var(--blue);
+  color: var(--white);
+}
 
-/* INSTRUCCIONES */
+/* ============================================================
+   INSTRUCCIONES
+   ============================================================ */
 .instrucciones {
-  background: #f7fcff;
-  padding: 14px 22px;
-  border-radius: 10px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 6px rgba(0, 92, 172, 0.07);
+  padding: 20px 28px;
 }
 .instrucciones h3 {
-  color: #0070c0;
-  margin: 0 0 10px 0;
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
   font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .instrucciones ol {
   margin: 0;
-  padding-left: 30px;
-  color: #444;
-  font-size: 1rem;
+  padding-left: 22px;
+  color: var(--gray-500);
+  font-size: 0.9rem;
 }
 .instrucciones li {
-  margin-bottom: 7px;
+  margin-bottom: 6px;
   line-height: 1.5;
 }
+.instrucciones b {
+  color: var(--navy);
+}
 
-/* FORMULARIO */
+/* ============================================================
+   SECTION TITLES
+   ============================================================ */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gray-100);
+}
+
+/* ============================================================
+   FORMULARIO
+   ============================================================ */
 .consulta-form-section {
-  background: #f0f6fa;
-  border-radius: 8px;
-  padding: 16px 22px 10px 22px;
-  margin-bottom: 22px;
-  box-shadow: 0 2px 6px rgba(0, 92, 172, 0.05);
+  padding: 24px 28px 20px;
 }
 #consultaForm {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 22px;
-  align-items: flex-end;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px 20px;
+  align-items: end;
 }
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
-#btn-consultar,
-.export-buttons button {
-  border: none;
-  border-radius: 6px;
-  padding: 10px 26px;
-  font-size: 1.12rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 12px;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(0,92,172,0.11);
-  text-shadow: 0 1px 1px rgba(0,0,0,0.06);
+.form-row label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-row input[type="text"],
+.form-row input[type="date"] {
+  height: 42px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-size: 0.95rem;
+  font-family: var(--font);
+  color: var(--gray-900);
+  background: var(--gray-50);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-row input:focus {
+  border-color: var(--blue-light);
+  box-shadow: 0 0 0 3px rgba(30,136,229,.15);
+  background: var(--white);
+}
+.form-row-btn {
+  align-self: end;
 }
 #btn-consultar {
-  background: #0089d6;
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 24px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: opacity var(--transition), box-shadow var(--transition);
+  box-shadow: 0 2px 8px rgba(21,101,192,.3);
+  white-space: nowrap;
+  width: 100%;
+  justify-content: center;
+}
+#btn-consultar svg {
+  width: 17px;
+  height: 17px;
 }
 #btn-consultar:hover {
-  background: #005cac;
-}
-.export-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.export-buttons button#btn-pdf {
-  background: #34a853;
-  color: #fff;
-}
-.export-buttons button#btn-pdf:hover {
-  background: #218838;
-}
-.export-buttons button#btn-excel {
-  background: #fbbc05;
-  color: #333;
-}
-.export-buttons button#btn-excel:hover {
-  background: #e2a600;
-}
-.export-buttons button#btn-consolidado-pdf {
-  background: #6f42c1;
-  color: #fff;
-}
-.export-buttons button#btn-consolidado-pdf:hover {
-  background: #56349e;
-}
-.export-buttons button#btn-consolidado-excel {
-  background: #17a2b8;
-  color: #fff;
-}
-.export-buttons button#btn-consolidado-excel:hover {
-  background: #117a8b;
+  opacity: 0.88;
+  box-shadow: 0 4px 14px rgba(21,101,192,.4);
 }
 
-/* FILTRO POR CUENTA */
+/* ============================================================
+   DATOS DEL CLIENTE
+   ============================================================ */
+.datos-cliente-section {
+  padding: 20px 28px 18px;
+  border-left: 4px solid var(--gold);
+  background: linear-gradient(90deg, #fffdf4 0%, var(--white) 100%);
+}
+.datos-cliente-section .section-title {
+  color: var(--amber);
+  border-bottom-color: #fde68a;
+}
+.datos-cliente-section .section-title svg { stroke: var(--gold); }
+#datos-cliente { font-size: 0.97rem; }
+.datos-row {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.datos-row span {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 24px 8px 0;
+  border-right: 1px solid #fde68a;
+  margin-right: 24px;
+}
+.datos-row span:last-child {
+  border-right: none;
+  margin-right: 0;
+}
+.datos-row span strong {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-400);
+  margin-bottom: 2px;
+}
+.datos-row span {
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* ============================================================
+   FILTRO POR CUENTA
+   ============================================================ */
 .filtro-cuenta-section {
+  padding: 14px 22px;
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f0f6fa;
-  border-radius: 8px;
-  padding: 10px 22px;
-  margin-bottom: 14px;
-  box-shadow: 0 2px 6px rgba(0, 92, 172, 0.05);
+  flex-wrap: wrap;
+  border-left: 4px solid var(--blue-light);
+}
+.filtro-cuenta-section svg {
+  color: var(--blue);
+  flex-shrink: 0;
 }
 .filtro-cuenta-section label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--navy);
   white-space: nowrap;
-  color: #005cac;
-  font-size: 1rem;
 }
 #filtro-cuenta {
-  border: 1px solid #b0c8e6;
-  border-radius: 5px;
-  padding: 6px 12px;
-  font-size: 1rem;
-  color: #333;
-  min-width: 180px;
+  height: 38px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-size: 0.92rem;
+  font-family: var(--font);
+  color: var(--gray-900);
+  background: var(--gray-50);
+  min-width: 200px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+#filtro-cuenta:focus {
+  border-color: var(--blue-light);
+  box-shadow: 0 0 0 3px rgba(30,136,229,.15);
 }
 
-/* DATOS DEL CLIENTE */
-.datos-cliente-section {
-  background: #fffbe6;
-  border: 1px solid #ffe8a3;
-  border-radius: 9px;
-  margin-bottom: 20px;
-  padding: 16px 22px 10px 22px;
-  box-shadow: 0 2px 8px rgba(255, 218, 77, 0.06);
-}
-.datos-cliente-section h3 { color: #be911b; margin-bottom: 8px; }
-#datos-cliente {
-  font-size: 1.09rem;
-  color: #8d6e1a;
-  font-weight: 500;
-}
-.datos-row {
+/* ============================================================
+   EXPORT BUTTONS
+   ============================================================ */
+.export-buttons {
+  padding: 14px 22px;
   display: flex;
-  gap: 32px;
   flex-wrap: wrap;
-  padding-top: 6px;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+.export-buttons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: opacity var(--transition), box-shadow var(--transition), transform var(--transition);
+  white-space: nowrap;
+}
+.export-buttons button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.export-buttons button:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.export-buttons button:active {
+  transform: translateY(0);
+}
+.export-buttons button#btn-pdf {
+  background: #d32f2f;
+  color: var(--white);
+}
+.export-buttons button#btn-excel {
+  background: #2e7d32;
+  color: var(--white);
+}
+.export-buttons button#btn-consolidado-pdf {
+  background: var(--purple);
+  color: var(--white);
+}
+.export-buttons button#btn-consolidado-excel {
+  background: var(--teal);
+  color: var(--white);
 }
 
-/* TABLA DE TRANSACCIONES */
+/* ============================================================
+   TABLA DE TRANSACCIONES
+   ============================================================ */
 #transacciones-section {
-  width: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+.table-wrapper {
   overflow-x: auto;
-  margin-bottom: 18px;
+  -webkit-overflow-scrolling: touch;
 }
 .table-financiera {
-  min-width: 800px;
   width: 100%;
+  min-width: 780px;
   border-collapse: collapse;
-  font-size: 1rem;
-  margin-bottom: 18px;
+  font-size: 0.88rem;
 }
-.table-financiera th,
-.table-financiera td {
-  border: 1px solid #e0e0e0;
-  padding: 10px 12px;
-  text-align: left;
-  word-break: break-word;
+.table-financiera thead tr {
+  background: var(--navy);
 }
 .table-financiera th {
-  background: #005cac;
-  color: #fff !important;
-  font-weight: 700;
+  color: var(--white) !important;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
-  text-align: center !important;
-  white-space: normal;
+  padding: 13px 14px;
+  text-align: left;
+  white-space: nowrap;
+  border: none;
 }
 .table-financiera th.moneda-th {
-  text-align: center !important;
+  text-align: right !important;
 }
-.table-financiera tr {
-  transition: background 0.2s;
+.table-financiera tbody tr {
+  border-bottom: 1px solid var(--gray-200);
+  transition: background var(--transition);
 }
-.table-financiera tr:hover {
-  background: #ddeffd;
+.table-financiera tbody tr:hover td {
+  background: var(--blue-pale) !important;
 }
-.table-financiera tr:hover td {
-  background: #ddeffd;
+.table-financiera tbody tr:nth-child(even) td {
+  background: var(--gray-50);
 }
-.table-financiera tr:nth-child(even) td {
-  background: #f3f7fa;
-}
-.table-financiera th,
 .table-financiera td {
+  padding: 11px 14px;
+  color: var(--gray-700);
   vertical-align: middle;
+  border: none;
+  word-break: break-word;
+  max-width: 180px;
 }
-.table-financiera th,
-.table-financiera td {
-  max-width: 200px;
-}
-.table-financiera th,
 .table-financiera td.observaciones-col {
-  min-width: 150px;
+  min-width: 140px;
+  font-size: 0.84rem;
+  color: var(--gray-500);
 }
 .table-financiera th.moneda-th,
 .table-financiera td.moneda-td {
   text-align: right;
-  font-family: "Segoe UI", Arial, sans-serif;
-  font-weight: 600;
-  color: #0a3c68;
+  font-variant-numeric: tabular-nums;
 }
 .table-financiera td.moneda-td {
-  background: #f7fcff;
-  font-variant-numeric: tabular-nums;
-  min-width: 120px;
+  min-width: 110px;
   padding-right: 18px;
+  white-space: nowrap;
 }
 .table-financiera td.moneda-td .moneda-simbolo {
-  font-weight: bold;
-  color: #005cac;
-  padding-right: 6px;
-  font-size: 1rem;
-  vertical-align: middle;
-  letter-spacing: 1px;
-  display: inline-block;
+  font-weight: 700;
+  color: var(--gray-400);
+  padding-right: 3px;
+  font-size: 0.82rem;
 }
 .table-financiera td.moneda-td .moneda-num {
-  font-size: 1rem;
-  letter-spacing: 1px;
-  vertical-align: middle;
-  display: inline-block;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.92rem;
 }
 
-/* Pagination styles */
+/* ============================================================
+   ALERTS (inside resultados)
+   ============================================================ */
+.alert {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  font-size: 0.93rem;
+  font-weight: 500;
+  margin: 20px;
+}
+.alert-warning {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid #fde68a;
+}
+.alert-danger {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid #fecaca;
+}
+.text-center { text-align: center; }
+
+/* ============================================================
+   SPINNER
+   ============================================================ */
+.spinner-border {
+  display: inline-block;
+  width: 1.6rem;
+  height: 1.6rem;
+  vertical-align: middle;
+  border: 3px solid var(--blue-pale);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   PAGINACIÓN
+   ============================================================ */
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 18px 16px;
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
 }
 .pagination button {
-  background: #0089d6;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 14px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  background: var(--white);
+  color: var(--navy);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font);
   cursor: pointer;
-  font-weight: 500;
+  transition: all var(--transition);
 }
-.pagination button.active,
 .pagination button:hover {
-  background: #005cac;
+  background: var(--blue-pale);
+  border-color: var(--blue-light);
+  color: var(--blue);
+}
+.pagination button.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
 }
 .pagination button:disabled {
-  background: #b0c8e6;
+  opacity: 0.35;
   cursor: default;
-  opacity: 0.6;
+  background: var(--gray-100);
 }
 .pag-ellipsis {
   display: flex;
   align-items: center;
   padding: 0 4px;
-  color: #005cac;
+  color: var(--gray-400);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
   user-select: none;
 }
 
-/* Footer styles */
-.main-footer {
-  background: #005cac;
-  color: #fff;
-  text-align: center;
-  padding: 20px 0;
-  margin-top: 40px;
-  font-size: 1rem;
-  letter-spacing: 1px;
+/* ============================================================
+   SVG ICON HELPER
+   ============================================================ */
+.icon-sm {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
-/* WhatsApp floating button - solo icono */
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.main-footer {
+  background: rgba(11,31,58,.95);
+  color: rgba(255,255,255,.6);
+  text-align: center;
+  padding: 24px 20px;
+  font-size: 0.84rem;
+  line-height: 1.7;
+  border-top: 2px solid var(--gold);
+}
+
+/* ============================================================
+   WHATSAPP BUTTON
+   ============================================================ */
 .whatsapp-float {
   position: fixed;
   bottom: 28px;
   right: 28px;
-  z-index: 1000;
+  z-index: 500;
   background: #25d366;
   border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.2);
-  padding: 12px;
-  transition: transform 0.2s;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
-  border: none;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(37,211,102,.35);
+  transition: transform 0.2s, background 0.2s;
   text-decoration: none;
 }
 .whatsapp-float:hover {
-  transform: scale(1.08);
+  transform: scale(1.1);
   background: #128c7e;
 }
 .whatsapp-float img {
-  width: 32px;
-  height: 32px;
-  display: block;
-}
-.spinner-border {
-  display: inline-block;
-  width: 2rem;
-  height: 2rem;
-  vertical-align: text-bottom;
-  border: 0.25em solid #0089d6;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spinner-border 0.75s linear infinite;
-  margin-right: 8px;
-}
-@keyframes spinner-border {
-  100% {
-    transform: rotate(360deg);
-  }
+  width: 30px;
+  height: 30px;
 }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 950px) {
-  .container {
-    max-width: 100vw;
-    padding: 12px 2vw;
-  }
-  .main-header {
-    padding: 12px 10px;
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
-  }
-  .logo {
-    height: 48px;
-  }
-  .main-header h1 {
-    font-size: 1.3rem;
-  }
-  .negocio-info {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
-  }
-  .negocio-logo {
-    height: 56px;
-  }
-  .negocio-nombre { font-size: 1rem;}
-  .negocio-direccion, .negocio-contacto { font-size: 0.98rem;}
-  .consulta-form-section { padding: 12px 8px;}
-  #consultaForm { gap: 10px;}
-  .form-row { width: 100%; }
-  .datos-row { gap: 14px; font-size: 0.97rem;}
-  .instrucciones { padding: 10px 6px;}
-  .export-buttons { flex-direction: column; align-items: stretch; }
+/* ============================================================
+   RESPONSIVE — TABLET (≤ 900px)
+   ============================================================ */
+@media (max-width: 900px) {
+  .header-inner { padding: 0 16px; height: 64px; }
+  .main-header h1 { font-size: 0.97rem; }
+  .container { margin: 20px auto 28px; padding: 0 12px; gap: 14px; }
+  .negocio-datos,
+  .instrucciones,
+  .consulta-form-section,
+  .datos-cliente-section { padding: 18px 18px; }
+  .negocio-logo { height: 58px; width: 58px; }
+  #consultaForm { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .export-buttons { justify-content: flex-start; }
 }
 
-@media (max-width: 650px) {
-  .container {
-    padding: 7px 0.5vw;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  .main-header h1 {font-size: 1.05rem;}
-  .negocio-logo {height: 44px;}
-  .negocio-nombre { font-size: 0.99rem;}
-  .negocio-direccion, .negocio-contacto { font-size: 0.95rem;}
-  .datos-row { gap: 10px; font-size: 0.95rem;}
-  .table-financiera {
-    min-width: 600px;
-    font-size: 0.92rem;
-  }
-  .table-financiera th, .table-financiera td {
-    padding: 7px 6px;
-    max-width: 110px;
-  }
-  .table-financiera th, .table-financiera td.observaciones-col {
-    min-width: 80px;
-  }
+/* ============================================================
+   RESPONSIVE — MOBILE (≤ 640px)
+   ============================================================ */
+@media (max-width: 640px) {
+  .header-inner { height: auto; padding: 12px 14px; flex-wrap: wrap; gap: 10px; }
+  .logo { height: 38px; }
+  .main-header h1 { font-size: 0.88rem; }
+  .header-tag { font-size: 0.62rem; }
+  .container { padding: 0 8px; gap: 12px; margin: 12px auto 24px; }
+  .negocio-info { flex-direction: column; text-align: center; }
+  .negocio-logo { height: 54px; width: 54px; }
+  .negocio-contacto { justify-content: center; }
+  .negocio-direccion { justify-content: center; }
+  .consulta-form-section { padding: 16px 14px; }
+  #consultaForm { grid-template-columns: 1fr 1fr; }
+  .form-row-btn { grid-column: 1 / -1; }
+  .datos-cliente-section { padding: 16px 14px; }
+  .datos-row { flex-direction: column; gap: 0; }
+  .datos-row span { border-right: none; border-bottom: 1px solid #fde68a; padding: 8px 0; margin-right: 0; margin-bottom: 0; }
+  .datos-row span:last-child { border-bottom: none; }
+  .export-buttons { padding: 12px 14px; justify-content: flex-start; }
+  .export-buttons button { flex: 1 1 calc(50% - 5px); justify-content: center; }
+  .filtro-cuenta-section { padding: 12px 14px; }
+  #filtro-cuenta { min-width: 0; width: 100%; }
+  .table-financiera { min-width: 600px; font-size: 0.82rem; }
+  .table-financiera th, .table-financiera td { padding: 9px 10px; }
+  .pagination { padding: 14px 10px; gap: 4px; }
+  .pagination button { height: 30px; min-width: 30px; font-size: 0.82rem; }
 }
+
+/* ============================================================
+   RESPONSIVE — SMALL MOBILE (≤ 400px)
+   ============================================================ */
+@media (max-width: 400px) {
+  #consultaForm { grid-template-columns: 1fr; }
+  .export-buttons button { flex: 1 1 100%; }
+  .main-header h1 { font-size: 0.82rem; }
+}
+
