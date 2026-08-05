@@ -177,7 +177,11 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
                 const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
                 return sum + (isNaN(num) ? 0 : num);
               }, 0);
-              let saldosHtml = '<div class="resumen-saldos-table">';
+              let saldosHtml = `<div class="resumen-saldos-table">
+                <div class="resumen-saldo-row resumen-saldo-header">
+                  <span class="resumen-cuenta">Cuentas</span>
+                  <span class="resumen-monto">Saldo</span>
+                </div>`;
               consolidadoResumen.forEach(c => {
                 saldosHtml += `<div class="resumen-saldo-row">
                   <span class="resumen-cuenta">${c.Cuenta}</span>

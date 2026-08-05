@@ -395,6 +395,18 @@ body {
   border-bottom: 1px solid #bfdbfe;
   font-size: 0.93rem;
 }
+.resumen-saldo-header {
+  padding-top: 0;
+  padding-bottom: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.resumen-saldo-header .resumen-cuenta,
+.resumen-saldo-header .resumen-monto {
+  color: var(--gray-500);
+}
 .resumen-saldo-row:last-child { border-bottom: none; }
 .resumen-cuenta {
   color: var(--navy);
@@ -1148,4 +1160,3 @@ body {
   .login-title { font-size: 0.9rem; }
   .auth-bar { padding: 0 14px; gap: 10px; }
 }
-
