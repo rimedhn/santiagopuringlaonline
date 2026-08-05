@@ -37,6 +37,18 @@ function requireAuth() {
   }
 }
 
+// Busca en un objeto de fila el valor de una columna por nombre,
+// comparando de forma insensible a mayúsculas y espacios.
+// Soporta BOM y variaciones de casing en los encabezados del CSV.
+function _getCol(row, nombre) {
+  const nombreNorm = nombre.toLowerCase().replace(/\s/g, '');
+  for (var key in row) {
+    var keyNorm = key.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/\s/g, '');
+    if (keyNorm === nombreNorm) return row[key] || '';
+  }
+  return '';
+}
+
 // Valida usuario y clave contra el CSV remoto.
 // - El usuario puede ser email o alfanumérico (comparación sin distinción de mayúsculas).
 // - La clave se compara de forma exacta (sensible a mayúsculas).
@@ -45,48 +57,56 @@ function requireAuth() {
 async function validateLogin(usuario, clave) {
   try {
     const response = await fetch(AUTH_CSV_URL);
-    if (!response.ok) throw new Error("No se pudo acceder al servicio de autenticación.");
+    if (!response.ok) throw new Error("HTTP " + response.status);
 
     const csv = await response.text();
 
-    // transformHeader: elimina BOM (\ufeff) y espacios en blanco de los nombres de columna.
-    // Google Sheets suele añadir BOM al inicio del primer encabezado del CSV.
-    const parsed = Papa.parse(csv, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: function (h) {
-        return h.replace(/^\uFEFF/, '').trim();
-      }
-    });
+    // Parsear con Papa.parse igual que lo hace app.js para las transacciones
+    const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
     const rows = parsed.data;
+
+    if (!rows || rows.length === 0) {
+      return { ok: false, mensaje: "No se pudo leer la lista de acceso. Intenta nuevamente." };
+    }
 
     const usuarioInput = usuario.trim().toLowerCase();
     const claveInput   = clave.trim();
 
-    // Buscar coincidencia: usuario case-insensitive (soporta email o alfanumérico),
-    // clave exacta, estado activo (insensible a mayúsculas y espacios)
-    const match = rows.find(function (row) {
-      const uRow   = (row["Usuario"] ?? "").trim().toLowerCase();
-      const cRow   = (row["Clave"]   ?? "").trim();
-      const estado = (row["Estado"]  ?? "").trim().toLowerCase();
-      return uRow === usuarioInput && cRow === claveInput && estado === "activo";
-    });
+    // Buscar coincidencia usando _getCol para tolerar cualquier variación
+    // de nombre de columna (BOM, espacios, mayúsculas)
+    var match = null;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var uRow   = _getCol(row, 'usuario').trim().toLowerCase();
+      var cRow   = _getCol(row, 'clave').trim();
+      var estado = _getCol(row, 'estado').trim().toLowerCase();
+      if (uRow === usuarioInput && cRow === claveInput && estado === 'activo') {
+        match = row;
+        break;
+      }
+    }
 
     if (!match) {
       // Verificar si el usuario+clave existen pero la cuenta está inactiva
-      const existeInactivo = rows.find(function (row) {
-        const uRow = (row["Usuario"] ?? "").trim().toLowerCase();
-        const cRow = (row["Clave"]   ?? "").trim();
-        return uRow === usuarioInput && cRow === claveInput;
-      });
+      var existeInactivo = false;
+      for (var j = 0; j < rows.length; j++) {
+        var r = rows[j];
+        var u2 = _getCol(r, 'usuario').trim().toLowerCase();
+        var c2 = _getCol(r, 'clave').trim();
+        if (u2 === usuarioInput && c2 === claveInput) {
+          existeInactivo = true;
+          break;
+        }
+      }
       if (existeInactivo) {
         return { ok: false, mensaje: "Tu cuenta se encuentra inactiva. Contacta a la institución." };
       }
       return { ok: false, mensaje: "Usuario o contraseña incorrectos." };
     }
 
-    const idCliente = (match["idCliente"] ?? "").trim();
-    return { ok: true, idCliente, usuario: (match["Usuario"] ?? "").trim() };
+    var idCliente = _getCol(match, 'idcliente').trim();
+    var usuarioVal = _getCol(match, 'usuario').trim();
+    return { ok: true, idCliente: idCliente, usuario: usuarioVal };
 
   } catch (err) {
     return { ok: false, mensaje: "Error de red: no se pudo verificar las credenciales. Intenta nuevamente." };
