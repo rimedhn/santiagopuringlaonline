@@ -18,11 +18,11 @@
 const SPREADSHEET_CONFIG = {
   acceso: {
     spreadsheetId: 'TU_SPREADSHEET_ID_DE_ACCESO_AQUI', // Hoja con columnas: idCliente, Usuario, Clave, Estado
-    sheetName: 'Acceso'
+    sheetName: 'AccesoClientes'
   },
   transacciones: {
     spreadsheetId: 'TU_SPREADSHEET_ID_DE_TRANSACCIONES_AQUI', // Hoja con las transacciones de clientes
-    sheetName: 'Transacciones'
+    sheetName: 'TransaccionesAhorros'
   }
 };
 
