@@ -2,6 +2,7 @@
 // AUTENTICACIÓN — AccesoClientes
 // Valida credenciales contra el CSV de Google Sheets y gestiona
 // la sesión del usuario autenticado en sessionStorage.
+// Columnas esperadas: idCliente, Usuario, Clave, Estado
 // ============================================================
 
 const AUTH_CSV_URL =
@@ -37,6 +38,9 @@ function requireAuth() {
 }
 
 // Valida usuario y clave contra el CSV remoto.
+// - El usuario puede ser email o alfanumérico (comparación sin distinción de mayúsculas).
+// - La clave se compara de forma exacta (sensible a mayúsculas).
+// - Solo usuarios con Estado "activo" (insensible a mayúsculas/espacios) pueden acceder.
 // Devuelve una Promise que resuelve con { ok, idCliente, usuario, mensaje }
 async function validateLogin(usuario, clave) {
   try {
@@ -44,34 +48,48 @@ async function validateLogin(usuario, clave) {
     if (!response.ok) throw new Error("No se pudo acceder al servicio de autenticación.");
 
     const csv = await response.text();
-    // PapaParse debe estar cargado antes de auth.js
-    const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
+
+    // transformHeader: elimina BOM (\ufeff) y espacios en blanco de los nombres de columna.
+    // Google Sheets suele añadir BOM al inicio del primer encabezado del CSV.
+    const parsed = Papa.parse(csv, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: function (h) {
+        return h.replace(/^\uFEFF/, '').trim();
+      }
+    });
     const rows = parsed.data;
 
-    // Buscar coincidencia exacta por Usuario y Clave (trim para robustez)
-    const match = rows.find(row => {
-      const uRow   = (row["Usuario"] ?? "").trim();
+    const usuarioInput = usuario.trim().toLowerCase();
+    const claveInput   = clave.trim();
+
+    // Buscar coincidencia: usuario case-insensitive (soporta email o alfanumérico),
+    // clave exacta, estado activo (insensible a mayúsculas y espacios)
+    const match = rows.find(function (row) {
+      const uRow   = (row["Usuario"] ?? "").trim().toLowerCase();
       const cRow   = (row["Clave"]   ?? "").trim();
       const estado = (row["Estado"]  ?? "").trim().toLowerCase();
-      return uRow === usuario.trim() && cRow === clave.trim() && estado === "activo";
+      return uRow === usuarioInput && cRow === claveInput && estado === "activo";
     });
 
     if (!match) {
-      // Verificar si el usuario existe pero está inactivo para dar mensaje más claro
-      const existe = rows.find(row =>
-        (row["Usuario"] ?? "").trim() === usuario.trim() &&
-        (row["Clave"]   ?? "").trim() === clave.trim()
-      );
-      if (existe) {
+      // Verificar si el usuario+clave existen pero la cuenta está inactiva
+      const existeInactivo = rows.find(function (row) {
+        const uRow = (row["Usuario"] ?? "").trim().toLowerCase();
+        const cRow = (row["Clave"]   ?? "").trim();
+        return uRow === usuarioInput && cRow === claveInput;
+      });
+      if (existeInactivo) {
         return { ok: false, mensaje: "Tu cuenta se encuentra inactiva. Contacta a la institución." };
       }
       return { ok: false, mensaje: "Usuario o contraseña incorrectos." };
     }
 
     const idCliente = (match["idCliente"] ?? "").trim();
-    return { ok: true, idCliente, usuario: match["Usuario"].trim() };
+    return { ok: true, idCliente, usuario: (match["Usuario"] ?? "").trim() };
 
   } catch (err) {
     return { ok: false, mensaje: "Error de red: no se pudo verificar las credenciales. Intenta nuevamente." };
   }
 }
+
