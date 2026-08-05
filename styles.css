@@ -153,6 +153,45 @@ body {
 .export-buttons button#btn-excel:hover {
   background: #e2a600;
 }
+.export-buttons button#btn-consolidado-pdf {
+  background: #6f42c1;
+  color: #fff;
+}
+.export-buttons button#btn-consolidado-pdf:hover {
+  background: #56349e;
+}
+.export-buttons button#btn-consolidado-excel {
+  background: #17a2b8;
+  color: #fff;
+}
+.export-buttons button#btn-consolidado-excel:hover {
+  background: #117a8b;
+}
+
+/* FILTRO POR CUENTA */
+.filtro-cuenta-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f0f6fa;
+  border-radius: 8px;
+  padding: 10px 22px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 92, 172, 0.05);
+}
+.filtro-cuenta-section label {
+  white-space: nowrap;
+  color: #005cac;
+  font-size: 1rem;
+}
+#filtro-cuenta {
+  border: 1px solid #b0c8e6;
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 1rem;
+  color: #333;
+  min-width: 180px;
+}
 
 /* DATOS DEL CLIENTE */
 .datos-cliente-section {

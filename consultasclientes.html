@@ -37,10 +37,11 @@
     <section class="instrucciones">
       <h3>¿Cómo usar este sitio?</h3>
       <ol>
-        <li>Ingresa tu <b>ID Cliente</b> en el campo correspondiente.</li>
+        <li>Ingresa tu <b>Código de Cliente</b> y/o <b>Número de Cuenta</b> en los campos correspondientes.</li>
         <li>Opcionalmente, selecciona un <b>rango de fechas</b> para filtrar los resultados.</li>
         <li>Haz clic en <b>Consultar</b> para ver tus transacciones.</li>
-        <li>Puedes <b>descargar</b> los resultados como PDF o Excel.</li>
+        <li>Usa el filtro <b>Filtrar por Cuenta</b> para ver solo una cuenta específica en los resultados.</li>
+        <li>Puedes <b>descargar</b> los resultados como PDF, Excel o un <b>Reporte Consolidado</b> con todas las cuentas.</li>
         <li>¿Necesitas ayuda? Usa el botón <b>WhatsApp</b> en la esquina.</li>
       </ol>
     </section>
@@ -48,8 +49,12 @@
     <section class="consulta-form-section">
       <form id="consultaForm">
         <div class="form-row">
-          <label for="cliente">ID Cliente:</label>
-          <input type="text" id="cliente" name="cliente" required>
+          <label for="codigoCliente">Código de Cliente:</label>
+          <input type="text" id="codigoCliente" name="codigoCliente" placeholder="Ej: 001234">
+        </div>
+        <div class="form-row">
+          <label for="cuenta">Número de Cuenta:</label>
+          <input type="text" id="cuenta" name="cuenta" placeholder="Ej: 100-000123-0">
         </div>
         <div class="form-row">
           <label for="fecha-inicial">Fecha inicial:</label>
@@ -69,10 +74,19 @@
       <h3>Datos del Cliente</h3>
       <div id="datos-cliente"></div>
     </section>
+    <!-- FILTRO POR CUENTA -->
+    <div id="filtro-cuenta-section" class="filtro-cuenta-section" style="display:none;">
+      <label for="filtro-cuenta"><strong>Filtrar por Cuenta:</strong></label>
+      <select id="filtro-cuenta">
+        <option value="">— Todas las cuentas —</option>
+      </select>
+    </div>
     <!-- BOTONES DE EXPORTACIÓN -->
     <div class="export-buttons">
       <button id="btn-pdf">Exportar PDF</button>
       <button id="btn-excel">Exportar Excel</button>
+      <button id="btn-consolidado-pdf">Reporte Consolidado PDF</button>
+      <button id="btn-consolidado-excel">Reporte Consolidado Excel</button>
     </div>
     <!-- TRANSACCIONES -->
     <section id="transacciones-section">
