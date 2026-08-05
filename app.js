@@ -1,4 +1,7 @@
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0H2b-KE2VaKy7u7whTbXkGyImP_V8X5jeecCalPen3QTfiC8IczD8gx9kJgImsAmAUP50DAPPZKtx/pub?gid=0&single=true&output=csv";
+// URL del Google Apps Script (mismo endpoint que auth.js).
+// Reemplaza con la URL /exec generada al desplegar script.gs.
+// Este valor debe coincidir con SCRIPT_URL en auth.js.
+const SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
 const NEGOCIO = {
   nombre: "Inversiones y Servicios para el desarrollo de Santiago Puringla",
   direccion: "Santiago Puringla, La Paz, Bo. El Centro. Honduras.",
@@ -138,23 +141,15 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
     document.getElementById('datos-cliente').innerHTML = "";
     document.getElementById('filtro-cuenta-section').style.display = "none";
 
-    fetch(SHEET_CSV_URL)
+    fetch(`${SCRIPT_URL}?action=getTransacciones&codigoCliente=${encodeURIComponent(codigoCliente)}&cuenta=${encodeURIComponent(cuentaBusqueda)}`)
         .then(response => {
             if (!response.ok) throw new Error('No se pudo acceder a los datos');
-            return response.text();
+            return response.json();
         })
-        .then(csv => {
-            const data = Papa.parse(csv, { header: true }).data;
+        .then(data => {
+            if (!Array.isArray(data)) throw new Error(data.error || 'Respuesta inesperada del servidor');
 
-            let filtrados = data.filter(row => {
-              if (row['Estado'] !== 'Activo') return false;
-              const matchCodigo = codigoCliente ? (row['CodigoCliente'] ?? '').trim() === codigoCliente : true;
-              const matchCuenta = cuentaBusqueda ? (row['Cuenta'] ?? '').trim() === cuentaBusqueda : true;
-              // Si se ingresaron ambos, ambos deben coincidir; si solo uno, ese debe coincidir
-              if (codigoCliente && cuentaBusqueda) return matchCodigo && matchCuenta;
-              if (codigoCliente) return matchCodigo;
-              return matchCuenta;
-            });
+            let filtrados = data;
 
             filtrados = filtrarPorFechas(filtrados, fechaInicial, fechaFinal);
             filtrados.forEach((row, idx) => row._rowNum = idx + 2);
