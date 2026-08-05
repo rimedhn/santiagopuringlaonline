@@ -1,7 +1,7 @@
 // URL del Google Apps Script (mismo endpoint que auth.js).
 // Reemplaza con la URL /exec generada al desplegar script.gs.
 // Este valor debe coincidir con SCRIPT_URL en auth.js.
-const SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUaUWPqELjKJAJtCCCJa0JZR0xAbM9HtDqZQTX4nY5rpmMI64UEAbUoD8VN-Ynrtsh/exec";
 const NEGOCIO = {
   nombre: "Inversiones y Servicios para el desarrollo de Santiago Puringla",
   direccion: "Santiago Puringla, La Paz, Bo. El Centro. Honduras.",
