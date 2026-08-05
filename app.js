@@ -1,7 +1,4 @@
-// URL del Google Apps Script (mismo endpoint que auth.js).
-// Reemplaza con la URL /exec generada al desplegar script.gs.
-// Este valor debe coincidir con SCRIPT_URL en auth.js.
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxE3XqITPK4Qe-OvX20cYc1I7ncrVvir1UTeujYhCCTxGQ70Qk4Y1D_LIm_C4HVwnQ/exec";
+// SCRIPT_URL se hereda de auth.js (cargado antes en el HTML).
 const NEGOCIO = {
   nombre: "Inversiones y Servicios para el desarrollo de Santiago Puringla",
   direccion: "Santiago Puringla, La Paz, Bo. El Centro. Honduras.",
@@ -91,7 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
 // ---- SESIÓN: precarga del cliente autenticado ----
 // Recupera idCliente y usuario del sessionStorage para evitar ingreso manual
 const sesion = getSession();
-if (sesion) {
+if (!sesion) {
+  // Sin sesión activa: redirigir al login
+  window.location.href = 'login.html';
+} else {
   // Mostrar nombre de usuario en la barra superior
   const authUserEl = document.getElementById('authUserName');
   if (authUserEl) authUserEl.textContent = sesion.usuario;
@@ -111,7 +111,11 @@ const btnLogout = document.getElementById('btnLogout');
 if (btnLogout) {
   btnLogout.addEventListener('click', function () {
     clearSession();
-    window.location.href = 'login.html';
+    // Limpiar datos en memoria antes de redirigir
+    resultadosBase = [];
+    resultadosFiltrados = [];
+    datosCliente = {};
+    window.location.replace('login.html');
   });
 }
 
@@ -164,10 +168,34 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
                 `<div class="datos-row">
                   <span><strong>Código Cliente:</strong> ${datosCliente.CodigoCliente}</span>
                   <span><strong>Nombre:</strong> ${datosCliente.NombreCliente}</span>
-                  <span><strong>Cuenta:</strong> ${datosCliente.Cuenta}</span>
                 </div>`;
               document.getElementById('datos-cliente').innerHTML = clienteHtml;
-              document.getElementById('datos-cliente-section').style.display = "block";
+
+              // Resumen de saldos por cuenta
+              const consolidadoResumen = calcularConsolidado(filtrados);
+              const totalSaldoResumen = consolidadoResumen.reduce((sum, c) => {
+                const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
+                return sum + (isNaN(num) ? 0 : num);
+              }, 0);
+              let saldosHtml = `<div class="resumen-saldos-table">
+                <div class="resumen-saldo-row resumen-saldo-header">
+                  <span class="resumen-cuenta">Cuentas</span>
+                  <span class="resumen-monto">Saldo</span>
+                </div>`;
+              consolidadoResumen.forEach(c => {
+                saldosHtml += `<div class="resumen-saldo-row">
+                  <span class="resumen-cuenta">${c.Cuenta}</span>
+                  <span class="resumen-monto">${formatoMoneda(c.UltimoSaldo)}</span>
+                </div>`;
+              });
+              saldosHtml += `<div class="resumen-saldo-row resumen-total">
+                <span class="resumen-cuenta">Total</span>
+                <span class="resumen-monto">${formatoMoneda(totalSaldoResumen)}</span>
+              </div>`;
+              saldosHtml += '</div>';
+              document.getElementById('resumen-saldos').innerHTML = saldosHtml;
+
+              document.getElementById('datos-cliente-section').style.display = "grid";
               poblarFiltroCuenta(filtrados);
             } else {
               document.getElementById('datos-cliente-section').style.display = "none";
@@ -187,6 +215,11 @@ document.getElementById('consultaForm').addEventListener('submit', function(e) {
         });
 });
 
+// Auto-consulta: si hay sesión con idCliente precargado, disparar la búsqueda automáticamente
+if (sesion && sesion.idCliente) {
+  document.getElementById('consultaForm').dispatchEvent(new Event('submit'));
+}
+
 function mostrarPagina(numPagina) {
     const totalPaginas = Math.ceil(resultadosFiltrados.length / REGISTROS_POR_PAGINA);
     if (resultadosFiltrados.length === 0) {
@@ -200,8 +233,8 @@ function mostrarPagina(numPagina) {
 
     let html = `<div class="table-wrapper"><table class="table-financiera"><thead><tr>`;
     CAMPOS_TABLA.forEach(obj => {
-        let align = MONEDA_CAMPOS.includes(obj.campo) ? ' class="moneda-th"' : '';
-        html += `<th${align}>${obj.label}</th>`;
+        let cls = MONEDA_CAMPOS.includes(obj.campo) ? 'moneda-th' : ('col-' + obj.campo.toLowerCase());
+        html += `<th class="${cls}">${obj.label}</th>`;
     });
     html += `</tr></thead><tbody>`;
     const inicio = (numPagina - 1) * REGISTROS_POR_PAGINA;
@@ -213,8 +246,8 @@ function mostrarPagina(numPagina) {
                 let valor = formatoMoneda(fila[campo]);
                 html += `<td class="moneda-td"><span class="moneda-simbolo">L</span><span class="moneda-num">${valor.slice(2)}</span></td>`;
             } else {
-                let tdClass = campo === "Observaciones" ? " class='observaciones-col'" : "";
-                html += `<td${tdClass}>${fila[campo] ?? ''}</td>`;
+                let tdClass = 'col-' + campo.toLowerCase();
+                html += `<td class="${tdClass}">${fila[campo] ?? ''}</td>`;
             }
         });
         html += `</tr>`;
@@ -372,13 +405,27 @@ document.getElementById('btn-consolidado-pdf').addEventListener('click', functio
       formatoMoneda(c.UltimoSaldo)
     ]);
 
+    // Fila de total general de saldos
+    const totalSaldo = consolidado.reduce((sum, c) => {
+      const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
+    rows.push(['', '', '', '', 'TOTAL SALDOS', formatoMoneda(totalSaldo)]);
+
     doc.autoTable({
         head: [['Cód. Cliente', 'Nombre', 'Cuenta', '# Trans.', 'Última Fecha', 'Saldo Actual']],
         body: rows,
         startY: 58,
         styles: { fontSize: 10 },
         headStyles: { halign: 'center', fontSize: 11 },
-        columnStyles: { 5: { halign: 'right' } }
+        columnStyles: { 5: { halign: 'right' } },
+        didParseCell: function (data) {
+          // Resaltar la fila de totales
+          if (data.row.index === rows.length - 1) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [220, 230, 245];
+          }
+        }
     });
 
     doc.save('consolidado_cliente.pdf');
@@ -387,6 +434,10 @@ document.getElementById('btn-consolidado-pdf').addEventListener('click', functio
 document.getElementById('btn-consolidado-excel').addEventListener('click', function () {
     if (resultadosFiltrados.length === 0) return;
     const consolidado = calcularConsolidado(resultadosFiltrados);
+    const totalSaldoXls = consolidado.reduce((sum, c) => {
+      const num = parseFloat((c.UltimoSaldo ?? '').toString().replace(/[^\d.-]/g, ''));
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
     const ws_data = [
         ['Cód. Cliente', 'Nombre', 'Cuenta', '# Trans.', 'Última Fecha', 'Saldo Actual'],
         ...consolidado.map(c => [
@@ -396,7 +447,8 @@ document.getElementById('btn-consolidado-excel').addEventListener('click', funct
           c.Transacciones,
           c.UltimaFecha ?? '',
           formatoMoneda(c.UltimoSaldo)
-        ])
+        ]),
+        ['', '', '', '', 'TOTAL SALDOS', formatoMoneda(totalSaldoXls)]
     ];
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
