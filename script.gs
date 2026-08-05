@@ -17,11 +17,11 @@
 // IDs de las hojas de cálculo
 const SPREADSHEET_CONFIG = {
   acceso: {
-    spreadsheetId: 'TU_SPREADSHEET_ID_DE_ACCESO_AQUI', // Hoja con columnas: idCliente, Usuario, Clave, Estado
+    spreadsheetId: '1gZp6E_s8Te6nrbA48dgSKGCmPjce2-ZdLjPYx3rLiC8', // Hoja con columnas: idCliente, Usuario, Clave, Estado
     sheetName: 'AccesoClientes'
   },
   transacciones: {
-    spreadsheetId: 'TU_SPREADSHEET_ID_DE_TRANSACCIONES_AQUI', // Hoja con las transacciones de clientes
+    spreadsheetId: '1SKE-SnL9XwrXLX46p3uVf2c6UF2AU19UOSSsFsSuWGs', // Hoja con las transacciones de clientes
     sheetName: 'TransaccionesAhorros'
   }
 };
