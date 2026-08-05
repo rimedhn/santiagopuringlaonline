@@ -85,6 +85,33 @@ function aplicarFiltroCuenta() {
 
 document.addEventListener('DOMContentLoaded', function () {
 
+// ---- SESIÓN: precarga del cliente autenticado ----
+// Recupera idCliente y usuario del sessionStorage para evitar ingreso manual
+const sesion = getSession();
+if (sesion) {
+  // Mostrar nombre de usuario en la barra superior
+  const authUserEl = document.getElementById('authUserName');
+  if (authUserEl) authUserEl.textContent = sesion.usuario;
+
+  // Precargar y bloquear el campo de código de cliente
+  const inputCliente = document.getElementById('codigoCliente');
+  if (inputCliente && sesion.idCliente) {
+    inputCliente.value = sesion.idCliente;
+    inputCliente.setAttribute('readonly', true);
+    const badge = document.getElementById('clientePrecargadoBadge');
+    if (badge) badge.style.display = 'inline-flex';
+  }
+}
+
+// Botón de cerrar sesión
+const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', function () {
+    clearSession();
+    window.location.href = 'login.html';
+  });
+}
+
 document.getElementById('filtro-cuenta').addEventListener('change', aplicarFiltroCuenta);
 
 document.getElementById('consultaForm').addEventListener('submit', function(e) {
